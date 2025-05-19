@@ -4,7 +4,7 @@ import { NavBar } from '@/components/NavBar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from "@/components/ui/progress";
-import { departmentStats } from '@/data/modules';
+import { departmentStats, trainingModules } from '@/data/modules';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,10 +12,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from '@/components/ui/button';
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from "@/components/ui/table";
+import { BarChart, Calendar, Users, Award, FileText, ArrowDown, ArrowUp } from 'lucide-react';
+import { ModuleCompletionChart } from '@/components/ModuleCompletionChart';
+import { EmployeeProgressTable } from '@/components/EmployeeProgressTable';
 
 const AdminDashboard = () => {
   const [selectedTab, setSelectedTab] = useState('overview');
   const [timeFilter, setTimeFilter] = useState('All Time');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   // Calculate overall completion rate
   const totalEmployees = departmentStats.reduce((sum, dept) => sum + dept.totalEmployees, 0);
@@ -24,6 +36,21 @@ const AdminDashboard = () => {
   const totalNotStarted = departmentStats.reduce((sum, dept) => sum + dept.notStarted, 0);
   
   const completionRate = Math.round((totalCompleted / totalEmployees) * 100);
+
+  // Sample module analytics data
+  const moduleAnalytics = trainingModules.map(module => ({
+    id: module.id,
+    title: module.title,
+    completionRate: Math.round(Math.random() * 70 + 10), // Random values between 10-80% for demo
+    averageAttempts: +(1 + Math.random()).toFixed(1),
+    averageScore: Math.round(Math.random() * 30 + 60), // Random values between 60-90%
+  })).sort((a, b) => sortDirection === 'asc' 
+    ? a.completionRate - b.completionRate 
+    : b.completionRate - a.completionRate);
+
+  const toggleSortDirection = () => {
+    setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -63,11 +90,7 @@ const AdminDashboard = () => {
             </DropdownMenu>
             
             <Button>
-              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                <polyline points="7 10 12 15 17 10" />
-                <line x1="12" x2="12" y1="15" y2="3" />
-              </svg>
+              <FileText className="h-4 w-4 mr-2" />
               Export Report
             </Button>
           </div>
@@ -121,9 +144,18 @@ const AdminDashboard = () => {
           className="mb-8"
         >
           <TabsList className="mb-6">
-            <TabsTrigger value="overview">Department Overview</TabsTrigger>
-            <TabsTrigger value="modules">Module Analytics</TabsTrigger>
-            <TabsTrigger value="employees">Employee Progress</TabsTrigger>
+            <TabsTrigger value="overview" className="flex items-center gap-2">
+              <BarChart className="h-4 w-4" />
+              Department Overview
+            </TabsTrigger>
+            <TabsTrigger value="modules" className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              Module Analytics
+            </TabsTrigger>
+            <TabsTrigger value="employees" className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Employee Progress
+            </TabsTrigger>
           </TabsList>
           
           <TabsContent value="overview">
@@ -170,16 +202,52 @@ const AdminDashboard = () => {
           </TabsContent>
           
           <TabsContent value="modules">
-            <Card>
-              <CardHeader>
-                <CardTitle>Module Analytics</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-10 text-muted-foreground">
-                  Module analytics will be available in the next update.
-                </div>
-              </CardContent>
-            </Card>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <CardTitle>Module Completion Rates</CardTitle>
+                    <Button variant="outline" size="sm" onClick={toggleSortDirection}>
+                      Sort {sortDirection === 'asc' ? 'Descending' : 'Ascending'}
+                      {sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 ml-2" /> : <ArrowDown className="h-4 w-4 ml-2" />}
+                    </Button>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-[350px]">
+                      <ModuleCompletionChart data={moduleAnalytics} />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              <div className="lg:col-span-1">
+                <Card className="h-full">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Module Performance</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Module</TableHead>
+                          <TableHead className="text-right">Avg. Score</TableHead>
+                          <TableHead className="text-right">Avg. Attempts</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {moduleAnalytics.map((module) => (
+                          <TableRow key={module.id}>
+                            <TableCell className="font-medium">{module.title.split(' ')[0]}</TableCell>
+                            <TableCell className="text-right">{module.averageScore}%</TableCell>
+                            <TableCell className="text-right">{module.averageAttempts}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </TabsContent>
           
           <TabsContent value="employees">
@@ -188,8 +256,8 @@ const AdminDashboard = () => {
                 <CardTitle>Employee Progress</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-10 text-muted-foreground">
-                  Detailed employee progress reports will be available in the next update.
+                <div className="mb-6">
+                  <EmployeeProgressTable />
                 </div>
               </CardContent>
             </Card>
