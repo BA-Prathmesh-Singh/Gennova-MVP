@@ -29,7 +29,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, isAuthenticated, user } = useAuth();
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -55,6 +55,13 @@ const Login = () => {
         title: "Login successful",
         description: "You have been logged in successfully.",
       });
+      
+      // Redirect user based on their role
+      if (user?.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (error) {
       toast({
         variant: "destructive",
@@ -65,6 +72,13 @@ const Login = () => {
       setIsLoading(false);
     }
   }
+
+  // Hint for demo credentials direct login
+  const handleDemoLogin = (email: string) => {
+    form.setValue('email', email);
+    form.setValue('password', 'demo123'); // Dummy password for the demo
+    form.handleSubmit(onSubmit)();
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 flex flex-col justify-center items-center p-4">
@@ -141,9 +155,27 @@ const Login = () => {
           
           <div className="mt-6 text-center text-sm text-gray-600">
             <p>Demo credentials:</p>
-            <p className="mt-1">Admin: admin@gennova.com</p>
-            <p>User: user@gennova.com</p>
-            <p className="mt-1 text-xs text-gray-500">(No password required for this demo)</p>
+            <div className="mt-1 space-y-1">
+              <p>
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto" 
+                  onClick={() => handleDemoLogin('admin@gennova.com')}
+                >
+                  Admin: admin@gennova.com
+                </Button>
+              </p>
+              <p>
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto" 
+                  onClick={() => handleDemoLogin('user@gennova.com')}
+                >
+                  User: user@gennova.com
+                </Button>
+              </p>
+            </div>
+            <p className="mt-1 text-xs text-gray-500">(Use the demo links above for quick access)</p>
           </div>
         </div>
       </div>
