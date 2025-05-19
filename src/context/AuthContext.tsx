@@ -26,12 +26,21 @@ export interface User {
   }
 }
 
+// Module progress update type
+export interface ModuleProgressUpdate {
+  completed: boolean;
+  attempts: number;
+  pointsEarned: number;
+  lastAttempt: string | null;
+}
+
 // Define auth context interface
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => void;
   logout: () => void;
   isAuthenticated: boolean;
+  updateProgress: (moduleId: string, update: ModuleProgressUpdate) => void;
 }
 
 // Create the context
@@ -137,11 +146,54 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
   };
 
+  // Update user progress
+  const updateProgress = (moduleId: string, update: ModuleProgressUpdate) => {
+    if (!user) return;
+
+    const updatedUser = { ...user };
+    
+    // Update module specific progress
+    updatedUser.progress.modules[moduleId] = {
+      ...updatedUser.progress.modules[moduleId],
+      ...update
+    };
+    
+    // Update total modules completed if this is a new completion
+    if (update.completed && !user.progress.modules[moduleId]?.completed) {
+      updatedUser.progress.totalModulesCompleted += 1;
+      
+      // Add related badge for this module
+      const module = trainingModules.find(m => m.id === moduleId);
+      if (module?.badgeId && !updatedUser.progress.badges.includes(module.badgeId)) {
+        updatedUser.progress.badges.push(module.badgeId);
+      }
+      
+      // Check if all modules are completed for certification badge
+      const allModulesCompleted = trainingModules.every(
+        module => updatedUser.progress.modules[module.id]?.completed
+      );
+      
+      if (allModulesCompleted && !updatedUser.progress.badges.includes('certified-aseptic-handler')) {
+        updatedUser.progress.badges.push('certified-aseptic-handler');
+      }
+    }
+    
+    // Update total points
+    if (update.pointsEarned) {
+      const previousPoints = user.progress.modules[moduleId]?.pointsEarned || 0;
+      const pointsDifference = update.pointsEarned - previousPoints;
+      updatedUser.progress.totalPoints += pointsDifference;
+    }
+    
+    setUser(updatedUser);
+  };
+
   const value = {
     user,
     login,
     logout,
     isAuthenticated: user !== null,
+    updateProgress,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -155,3 +207,6 @@ export const useAuth = () => {
   }
   return context;
 };
+
+// Import modules for badge assignment
+import { trainingModules } from '@/data/modules';

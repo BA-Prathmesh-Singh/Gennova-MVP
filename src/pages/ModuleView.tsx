@@ -1,253 +1,283 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
 import { NavBar } from '@/components/NavBar';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { ArrowLeft, ArrowRight, AlertCircle } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import { trainingModules } from '@/data/modules';
-import { useToast } from '@/components/ui/use-toast';
 
 const ModuleView = () => {
-  const { moduleId } = useParams<{moduleId: string}>();
+  const { moduleId } = useParams();
   const navigate = useNavigate();
+  const { user, updateProgress } = useAuth();
   const { toast } = useToast();
-  const [isGuidedMode, setIsGuidedMode] = useState(false);
-  const [currentStep, setCurrentStep] = useState(1);
-  const [totalSteps, setTotalSteps] = useState(5);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [isGuided, setIsGuided] = useState(false);
+  const [moduleCompleted, setModuleCompleted] = useState(false);
+  const [progress, setProgress] = useState(0);
   
-  // Find the current module
   const module = trainingModules.find(m => m.id === moduleId);
   
+  // Content steps for the module (simulated content)
+  const [steps, setSteps] = useState([
+    { type: 'intro', title: 'Introduction', content: '' },
+    { type: 'content', title: 'Key Concepts', content: '' },
+    { type: 'interaction', title: 'Practice Scenario', content: '' },
+    { type: 'quiz', title: 'Knowledge Check', content: '' },
+    { type: 'summary', title: 'Summary', content: '' }
+  ]);
+  
   useEffect(() => {
-    if (!module) {
+    if (!moduleId || !module) {
       navigate('/dashboard');
-    }
-  }, [module, navigate]);
-  
-  if (!module) return null;
-  
-  const handleCompleteStep = () => {
-    if (currentStep < totalSteps) {
-      setCurrentStep(prev => prev + 1);
-    } else {
-      // Module complete
-      toast({
-        title: "Module Completed!",
-        description: `You've successfully completed ${module.title}`,
-      });
-      navigate('/dashboard');
-    }
-  };
-  
-  const handleToggleGuided = () => {
-    setIsGuidedMode(!isGuidedMode);
-    setCurrentStep(1); // Reset to first step when toggling guidance
-  };
-  
-  // Dummy content for the first module
-  const moduleContent = () => {
-    if (moduleId === 'module1') {
-      return (
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-2xl font-bold mb-6">{module.title}</h1>
-          
-          <div className="mb-8">
-            <div className="flex justify-between mb-2">
-              <span className="text-sm font-medium">Progress</span>
-              <span className="text-sm text-muted-foreground">{currentStep} of {totalSteps}</span>
-            </div>
-            <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-              <div 
-                className="bg-primary h-2 animate-progress-fill" 
-                style={{ width: `${(currentStep / totalSteps) * 100}%` }}
-              ></div>
-            </div>
-          </div>
-          
-          {/* 2.5D Game Area */}
-          <Card className="mb-6 aspect-video overflow-hidden">
-            <CardContent className="p-0 h-full">
-              <div className="relative w-full h-full bg-pharma-blue/5">
-                {currentStep === 1 && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
-                    <div className="text-5xl mb-4">🧪</div>
-                    <h3 className="text-xl font-bold mb-2">Aseptic Area Awareness</h3>
-                    <p className="max-w-md text-gray-600 mb-4">
-                      Welcome to your aseptic training! Learn to identify different cleanroom zones and understand contamination risks.
-                    </p>
-                    {isGuidedMode && (
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4 text-sm text-blue-800">
-                        Guided Mode: Your virtual instructor will explain each concept in detail.
-                      </div>
-                    )}
-                    <Button onClick={handleCompleteStep}>Begin Learning</Button>
-                  </div>
-                )}
-                
-                {currentStep === 2 && (
-                  <div className="absolute inset-0 flex flex-col items-start justify-start p-6">
-                    <h3 className="text-lg font-bold mb-4">Clean Room Classification</h3>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-                      <div className="bg-white rounded-lg p-4 shadow-sm">
-                        <div className="font-bold mb-1">Grade A (ISO 5)</div>
-                        <p className="text-sm text-gray-600 mb-2">Critical zones for high-risk operations</p>
-                        {isGuidedMode && (
-                          <p className="text-xs text-blue-600 italic">Highest air quality with laminar flow</p>
-                        )}
-                      </div>
-                      
-                      <div className="bg-white rounded-lg p-4 shadow-sm">
-                        <div className="font-bold mb-1">Grade B (ISO 6)</div>
-                        <p className="text-sm text-gray-600 mb-2">Background for Grade A zones</p>
-                        {isGuidedMode && (
-                          <p className="text-xs text-blue-600 italic">Surrounds Grade A areas for aseptic preparation</p>
-                        )}
-                      </div>
-                      
-                      <div className="bg-white rounded-lg p-4 shadow-sm">
-                        <div className="font-bold mb-1">Grade C (ISO 7)</div>
-                        <p className="text-sm text-gray-600 mb-2">Less critical stages of manufacturing</p>
-                        {isGuidedMode && (
-                          <p className="text-xs text-blue-600 italic">Used for less critical processing steps</p>
-                        )}
-                      </div>
-                      
-                      <div className="bg-white rounded-lg p-4 shadow-sm">
-                        <div className="font-bold mb-1">Grade D (ISO 8)</div>
-                        <p className="text-sm text-gray-600 mb-2">Clean areas for less critical activities</p>
-                        {isGuidedMode && (
-                          <p className="text-xs text-blue-600 italic">Starting materials handling and preparation</p>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <div className="mt-4 w-full text-right">
-                      <Button onClick={handleCompleteStep}>Continue</Button>
-                    </div>
-                  </div>
-                )}
-                
-                {currentStep === 3 && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center p-6">
-                    <h3 className="text-lg font-bold mb-4">Contamination Sources</h3>
-                    
-                    <div className="relative w-full max-w-xl h-72 bg-pharma-lightBlue rounded-lg shadow-inner overflow-hidden mb-4">
-                      {/* Interactive 2.5D area with contamination sources */}
-                      <div className="absolute top-1/4 left-1/4 bg-red-200 rounded-full h-12 w-12 flex items-center justify-center cursor-pointer hover:bg-red-300 transition-colors" title="Personnel">
-                        👤
-                      </div>
-                      
-                      <div className="absolute top-1/3 right-1/4 bg-red-200 rounded-full h-12 w-12 flex items-center justify-center cursor-pointer hover:bg-red-300 transition-colors" title="Equipment">
-                        ⚙️
-                      </div>
-                      
-                      <div className="absolute bottom-1/3 left-1/3 bg-red-200 rounded-full h-12 w-12 flex items-center justify-center cursor-pointer hover:bg-red-300 transition-colors" title="Raw Materials">
-                        📦
-                      </div>
-                      
-                      <div className="absolute bottom-1/4 right-1/3 bg-red-200 rounded-full h-12 w-12 flex items-center justify-center cursor-pointer hover:bg-red-300 transition-colors" title="Environment">
-                        🌡️
-                      </div>
-                      
-                      {isGuidedMode && (
-                        <div className="absolute bottom-2 left-0 right-0 mx-auto w-3/4 bg-blue-50 border border-blue-200 rounded p-2 text-xs text-blue-800 text-center">
-                          Hover over each source to learn about contamination risks
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="w-full text-right">
-                      <Button onClick={handleCompleteStep}>Continue</Button>
-                    </div>
-                  </div>
-                )}
-                
-                {currentStep === 4 && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center p-6">
-                    <h3 className="text-lg font-bold mb-4">Risk Assessment Quiz</h3>
-                    
-                    <div className="w-full max-w-xl bg-white rounded-lg shadow p-4 mb-4">
-                      <p className="mb-3">Which of the following is NOT a common source of contamination in aseptic processing?</p>
-                      
-                      <div className="space-y-2">
-                        <div className="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
-                          <input type="radio" id="opt1" name="quiz" className="w-4 h-4" />
-                          <label htmlFor="opt1">Personnel movement</label>
-                        </div>
-                        
-                        <div className="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
-                          <input type="radio" id="opt2" name="quiz" className="w-4 h-4" />
-                          <label htmlFor="opt2">Improper gowning</label>
-                        </div>
-                        
-                        <div className="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
-                          <input type="radio" id="opt3" name="quiz" className="w-4 h-4" />
-                          <label htmlFor="opt3">Digital documentation</label>
-                          {isGuidedMode && (
-                            <span className="ml-2 text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">Correct Answer</span>
-                          )}
-                        </div>
-                        
-                        <div className="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
-                          <input type="radio" id="opt4" name="quiz" className="w-4 h-4" />
-                          <label htmlFor="opt4">Air handling system failures</label>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="w-full text-right">
-                      <Button onClick={handleCompleteStep}>Submit Answer</Button>
-                    </div>
-                  </div>
-                )}
-                
-                {currentStep === 5 && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
-                    <div className="text-5xl mb-4 animate-badge-pop">🏆</div>
-                    <h3 className="text-xl font-bold mb-2">Module Complete!</h3>
-                    <p className="max-w-md text-gray-600 mb-6">
-                      Congratulations! You've successfully completed the Aseptic Area Awareness module.
-                    </p>
-                    <div className="mb-6 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800">
-                      <div className="font-medium mb-1">Points Earned: {module.points}</div>
-                      <div className="text-sm">New Badge: {module.title} Expert</div>
-                    </div>
-                    <Button onClick={handleCompleteStep}>Return to Dashboard</Button>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-          
-          <div className="flex justify-between items-center">
-            <Button variant="outline" onClick={handleToggleGuided}>
-              {isGuidedMode ? 'Disable' : 'Enable'} Guided Mode
-            </Button>
-            
-            <div className="text-sm text-muted-foreground">
-              {isGuidedMode ? 'Guided Mode Active' : 'Self-Learning Mode'}
-            </div>
-          </div>
-        </div>
-      );
+      return;
     }
     
-    return (
-      <div className="max-w-3xl mx-auto text-center py-12">
-        <div className="text-5xl mb-6">🔧</div>
-        <h2 className="text-2xl font-bold mb-2">{module.title}</h2>
-        <p className="text-gray-600 mb-6">This module is under development and will be available soon.</p>
-        <Button onClick={() => navigate('/dashboard')}>Return to Dashboard</Button>
-      </div>
+    // Check if prerequisites are met
+    const prerequisitesMet = module.prerequisites.every(
+      prereqId => user?.progress.modules[prereqId]?.completed
     );
+    
+    if (!prerequisitesMet && moduleId !== 'module1') {
+      toast({
+        variant: "destructive",
+        title: "Prerequisites not met",
+        description: "You need to complete previous modules first."
+      });
+      navigate('/dashboard');
+      return;
+    }
+    
+    // Generate simulated content based on the module
+    generateModuleContent(module);
+    
+    // Check if module was previously completed
+    if (user?.progress.modules[moduleId]?.completed) {
+      setModuleCompleted(true);
+    }
+    
+    // Set initial progress
+    updateModuleProgress(0);
+  }, [moduleId, user]);
+  
+  const generateModuleContent = (module) => {
+    // This is where you would fetch real content from the backend
+    // For now we'll generate simulated content based on module type
+    const newSteps = [...steps];
+    
+    // Update intro
+    newSteps[0].content = `Welcome to ${module.title}. This module will teach you the essential skills and knowledge related to ${module.description.toLowerCase()}`;
+    
+    // Update content based on module type
+    if (module.id === 'module1') {
+      newSteps[1].content = 'Aseptic areas are specialized environments designed to minimize contamination risks. Key principles include maintaining air quality, proper gowning procedures, and understanding contamination sources.';
+      newSteps[2].content = 'Identify potential contamination sources in this cleanroom scenario. Click on areas that might pose contamination risks.';
+      newSteps[3].content = 'Quiz: What is the primary purpose of HEPA filters in cleanroom environments?';
+    } else if (module.id === 'module2') {
+      newSteps[1].content = 'Proper gowning is essential to prevent contamination. The sequence and technique of gowning are critical to maintaining aseptic conditions.';
+      newSteps[2].content = 'Practice the correct gowning sequence by arranging the steps in the proper order.';
+      newSteps[3].content = 'Quiz: Which part of the gowning procedure should come first?';
+    } else if (module.id === 'module3') {
+      newSteps[1].content = 'Materials and equipment in aseptic environments must be handled according to strict protocols to prevent contamination.';
+      newSteps[2].content = 'Practice proper material transfer procedures by selecting the correct technique for each scenario.';
+      newSteps[3].content = 'Quiz: What is the correct way to transfer materials through an air lock?';
+    } else if (module.id === 'module4') {
+      newSteps[1].content = 'Identifying potential contamination incidents early and applying proper control measures is critical to maintaining product safety.';
+      newSteps[2].content = 'Review these scenarios and identify which represent contamination risks and what actions should be taken.';
+      newSteps[3].content = 'Quiz: What should be your first action when you observe a potential contamination event?';
+    }
+    
+    // Update summary
+    newSteps[4].content = `Congratulations on completing the ${module.title} module! You've learned about ${module.description.toLowerCase()}`;
+    
+    setSteps(newSteps);
   };
   
+  const updateModuleProgress = (stepIndex) => {
+    const newProgress = Math.round(((stepIndex) / (steps.length - 1)) * 100);
+    setProgress(newProgress);
+  };
+  
+  const handleNextStep = () => {
+    if (currentStep < steps.length - 1) {
+      const nextStep = currentStep + 1;
+      setCurrentStep(nextStep);
+      updateModuleProgress(nextStep);
+    } else {
+      // Module completed
+      completeModule();
+    }
+  };
+  
+  const handlePrevStep = () => {
+    if (currentStep > 0) {
+      const prevStep = currentStep - 1;
+      setCurrentStep(prevStep);
+      updateModuleProgress(prevStep);
+    }
+  };
+  
+  const completeModule = () => {
+    if (!module) return;
+    
+    // Mark module as completed in user progress
+    if (updateProgress) {
+      updateProgress(module.id, {
+        completed: true,
+        attempts: (user?.progress.modules[module.id]?.attempts || 0) + 1,
+        pointsEarned: module.points,
+        lastAttempt: new Date().toISOString()
+      });
+    }
+    
+    // Show completion message
+    toast({
+      title: "Module Completed!",
+      description: `You've earned ${module.points} points and a new badge!`,
+    });
+    
+    // Navigate back to dashboard
+    setTimeout(() => {
+      navigate('/dashboard');
+    }, 2000);
+  };
+  
+  const renderStepContent = () => {
+    const step = steps[currentStep];
+    
+    switch (step.type) {
+      case 'intro':
+      case 'content':
+      case 'summary':
+        return (
+          <div className="space-y-4">
+            {isGuided && (
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-md flex items-start gap-2">
+                <div className="text-blue-500 mt-0.5"><AlertCircle size={16} /></div>
+                <div>
+                  <div className="font-medium text-sm text-blue-700">Guided Mode</div>
+                  <div className="text-sm text-blue-600">
+                    Additional guidance will be provided to help you master this content.
+                  </div>
+                </div>
+              </div>
+            )}
+            <p className="text-gray-700">{step.content}</p>
+          </div>
+        );
+        
+      case 'interaction':
+        return (
+          <div className="space-y-6">
+            <p className="text-gray-700">{step.content}</p>
+            <div className="bg-gray-50 p-4 rounded-md border">
+              {/* This would be replaced by actual interactive content */}
+              <div className="text-center p-8 text-gray-500">
+                Interactive scenario simulation would be displayed here
+                {isGuided && <div className="mt-2 text-blue-600 text-sm">Guided assistance is enabled</div>}
+              </div>
+            </div>
+          </div>
+        );
+        
+      case 'quiz':
+        return (
+          <div className="space-y-6">
+            <p className="text-gray-700">{step.content}</p>
+            <div className="space-y-3">
+              {/* Sample quiz options - would be dynamic in a real implementation */}
+              {['A. To remove particles from incoming air', 
+                'B. To maintain positive pressure', 
+                'C. To control humidity', 
+                'D. To reduce energy costs'].map((option, index) => (
+                <div key={index} className="flex items-center space-x-2 p-3 border rounded-md hover:bg-gray-50 cursor-pointer">
+                  <input type="radio" name="quiz" id={`option-${index}`} />
+                  <label htmlFor={`option-${index}`} className="cursor-pointer w-full">{option}</label>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+        
+      default:
+        return <p>Content unavailable</p>;
+    }
+  };
+  
+  if (!module) {
+    return <div>Module not found</div>;
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <NavBar />
+      
       <main className="container px-4 py-8 mx-auto">
-        {moduleContent()}
+        <div className="mb-6">
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate('/dashboard')}
+            className="mb-4"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Dashboard
+          </Button>
+          
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-2">
+            <div>
+              <h1 className="text-2xl font-bold">{module.title}</h1>
+              <p className="text-muted-foreground">{module.description}</p>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <div className="text-sm text-muted-foreground">
+                {steps[currentStep].title} ({currentStep + 1}/{steps.length})
+              </div>
+              <div className="w-32">
+                <Progress value={progress} className="h-2" />
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>{steps[currentStep].title}</CardTitle>
+            {module.requiredTime && (
+              <CardDescription>
+                Estimated time: {module.requiredTime}
+              </CardDescription>
+            )}
+          </CardHeader>
+          <CardContent>
+            {renderStepContent()}
+          </CardContent>
+          <CardFooter className="flex justify-between">
+            <Button 
+              variant="outline" 
+              onClick={handlePrevStep}
+              disabled={currentStep === 0}
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Previous
+            </Button>
+            
+            <Button onClick={handleNextStep}>
+              {currentStep < steps.length - 1 ? (
+                <>
+                  Next
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </>
+              ) : (
+                'Complete Module'
+              )}
+            </Button>
+          </CardFooter>
+        </Card>
       </main>
     </div>
   );
