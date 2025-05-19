@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -52,15 +53,18 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				sidebar: {
-					DEFAULT: 'hsl(var(--sidebar-background))',
-					foreground: 'hsl(var(--sidebar-foreground))',
-					primary: 'hsl(var(--sidebar-primary))',
-					'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
-					accent: 'hsl(var(--sidebar-accent))',
-					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
-					border: 'hsl(var(--sidebar-border))',
-					ring: 'hsl(var(--sidebar-ring))'
+				// Pharma specific colors
+				pharma: {
+					blue: '#0063B2',
+					green: '#2C8D46',
+					lightBlue: '#E5F0F9',
+					lightGreen: '#E5F5EA',
+					gray: '#F0F4F8'
+				},
+				badge: {
+					gold: '#FFD700',
+					silver: '#C0C0C0',
+					bronze: '#CD7F32'
 				}
 			},
 			borderRadius: {
