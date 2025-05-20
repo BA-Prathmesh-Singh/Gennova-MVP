@@ -20,14 +20,16 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
-import { BarChart, Calendar, Users, Award, FileText, ArrowDown, ArrowUp } from 'lucide-react';
+import { BarChart, Calendar, Users, FileText, ArrowDown, ArrowUp } from 'lucide-react';
 import { ModuleCompletionChart } from '@/components/ModuleCompletionChart';
 import { EmployeeProgressTable } from '@/components/EmployeeProgressTable';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const AdminDashboard = () => {
   const [selectedTab, setSelectedTab] = useState('overview');
   const [timeFilter, setTimeFilter] = useState('All Time');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const isMobile = useIsMobile();
 
   // Calculate overall completion rate
   const totalEmployees = departmentStats.reduce((sum, dept) => sum + dept.totalEmployees, 0);
@@ -56,17 +58,17 @@ const AdminDashboard = () => {
     <div className="min-h-screen bg-gray-50">
       <NavBar />
       
-      <main className="container px-4 py-8 mx-auto">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+      <main className="container px-4 py-6 mx-auto">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <div>
-            <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-            <p className="text-muted-foreground">Training overview and compliance tracking</p>
+            <h1 className="text-xl md:text-2xl font-bold">Admin Dashboard</h1>
+            <p className="text-sm md:text-base text-muted-foreground">Training overview and compliance tracking</p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline">
+                <Button variant="outline" className="w-full sm:w-auto text-sm">
                   {timeFilter}
                   <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-2">
                     <path d="m6 9 6 6 6-6" />
@@ -89,50 +91,50 @@ const AdminDashboard = () => {
               </DropdownMenuContent>
             </DropdownMenu>
             
-            <Button>
+            <Button className="w-full sm:w-auto text-sm">
               <FileText className="h-4 w-4 mr-2" />
               Export Report
             </Button>
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total Employees</CardTitle>
+            <CardHeader className="pb-2 px-4 py-3">
+              <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">Total Employees</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{totalEmployees}</div>
+            <CardContent className="px-4 py-2">
+              <div className="text-xl md:text-2xl font-bold">{totalEmployees}</div>
             </CardContent>
           </Card>
           
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Completion Rate</CardTitle>
+            <CardHeader className="pb-2 px-4 py-3">
+              <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">Completion Rate</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">{completionRate}%</div>
+            <CardContent className="px-4 py-2">
+              <div className="text-xl md:text-2xl font-bold text-green-600">{completionRate}%</div>
               <Progress value={completionRate} className="h-2 mt-2" />
             </CardContent>
           </Card>
           
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">In Progress</CardTitle>
+            <CardHeader className="pb-2 px-4 py-3">
+              <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">In Progress</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-amber-500">{totalInProgress}</div>
-              <div className="text-sm text-muted-foreground">{Math.round((totalInProgress / totalEmployees) * 100)}% of total</div>
+            <CardContent className="px-4 py-2">
+              <div className="text-xl md:text-2xl font-bold text-amber-500">{totalInProgress}</div>
+              <div className="text-xs md:text-sm text-muted-foreground">{Math.round((totalInProgress / totalEmployees) * 100)}% of total</div>
             </CardContent>
           </Card>
           
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Not Started</CardTitle>
+            <CardHeader className="pb-2 px-4 py-3">
+              <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">Not Started</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-500">{totalNotStarted}</div>
-              <div className="text-sm text-muted-foreground">{Math.round((totalNotStarted / totalEmployees) * 100)}% of total</div>
+            <CardContent className="px-4 py-2">
+              <div className="text-xl md:text-2xl font-bold text-red-500">{totalNotStarted}</div>
+              <div className="text-xs md:text-sm text-muted-foreground">{Math.round((totalNotStarted / totalEmployees) * 100)}% of total</div>
             </CardContent>
           </Card>
         </div>
@@ -141,35 +143,35 @@ const AdminDashboard = () => {
           defaultValue="overview" 
           value={selectedTab}
           onValueChange={setSelectedTab}
-          className="mb-8"
+          className="mb-6"
         >
-          <TabsList className="mb-6">
-            <TabsTrigger value="overview" className="flex items-center gap-2">
-              <BarChart className="h-4 w-4" />
-              Department Overview
+          <TabsList className="mb-5 w-full overflow-x-auto flex justify-start md:justify-center pb-2 no-scrollbar">
+            <TabsTrigger value="overview" className="flex items-center gap-2 text-xs md:text-sm">
+              <BarChart className="h-3 w-3 md:h-4 md:w-4" />
+              {isMobile ? 'Overview' : 'Department Overview'}
             </TabsTrigger>
-            <TabsTrigger value="modules" className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              Module Analytics
+            <TabsTrigger value="modules" className="flex items-center gap-2 text-xs md:text-sm">
+              <Calendar className="h-3 w-3 md:h-4 md:w-4" />
+              {isMobile ? 'Modules' : 'Module Analytics'}
             </TabsTrigger>
-            <TabsTrigger value="employees" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Employee Progress
+            <TabsTrigger value="employees" className="flex items-center gap-2 text-xs md:text-sm">
+              <Users className="h-3 w-3 md:h-4 md:w-4" />
+              {isMobile ? 'Employees' : 'Employee Progress'}
             </TabsTrigger>
           </TabsList>
           
           <TabsContent value="overview">
             <Card>
-              <CardHeader>
-                <CardTitle>Department Completion Status</CardTitle>
+              <CardHeader className="px-4 py-4">
+                <CardTitle className="text-base md:text-lg">Department Completion Status</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
+              <CardContent className="px-3 md:px-4">
+                <div className="space-y-4 md:space-y-6">
                   {departmentStats.map((dept) => (
                     <div key={dept.department}>
                       <div className="flex justify-between mb-1">
-                        <span className="text-sm font-medium">{dept.department}</span>
-                        <span className="text-sm text-muted-foreground">
+                        <span className="text-xs md:text-sm font-medium">{dept.department}</span>
+                        <span className="text-xs md:text-sm text-muted-foreground">
                           {Math.round((dept.completed / dept.totalEmployees) * 100)}% Complete
                         </span>
                       </div>
@@ -202,60 +204,56 @@ const AdminDashboard = () => {
           </TabsContent>
           
           <TabsContent value="modules">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2">
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle>Module Completion Rates</CardTitle>
-                    <Button variant="outline" size="sm" onClick={toggleSortDirection}>
-                      Sort {sortDirection === 'asc' ? 'Descending' : 'Ascending'}
-                      {sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 ml-2" /> : <ArrowDown className="h-4 w-4 ml-2" />}
-                    </Button>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-[350px]">
-                      <ModuleCompletionChart data={moduleAnalytics} />
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+            <div className="grid grid-cols-1 gap-4 lg:gap-6">
+              <Card>
+                <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 py-4">
+                  <CardTitle className="text-base md:text-lg mb-2 sm:mb-0">Module Completion Rates</CardTitle>
+                  <Button variant="outline" size="sm" onClick={toggleSortDirection} className="text-xs">
+                    Sort {sortDirection === 'asc' ? 'Desc.' : 'Asc.'}
+                    {sortDirection === 'asc' ? <ArrowUp className="h-3 w-3 ml-1" /> : <ArrowDown className="h-3 w-3 ml-1" />}
+                  </Button>
+                </CardHeader>
+                <CardContent className="px-2 md:px-4">
+                  <div className="h-[300px] md:h-[350px]">
+                    <ModuleCompletionChart data={moduleAnalytics} />
+                  </div>
+                </CardContent>
+              </Card>
               
-              <div className="lg:col-span-1">
-                <Card className="h-full">
-                  <CardHeader>
-                    <CardTitle className="text-lg">Module Performance</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Module</TableHead>
-                          <TableHead className="text-right">Avg. Score</TableHead>
-                          <TableHead className="text-right">Avg. Attempts</TableHead>
+              <Card>
+                <CardHeader className="px-4 py-4">
+                  <CardTitle className="text-base md:text-lg">Module Performance</CardTitle>
+                </CardHeader>
+                <CardContent className="px-2 md:px-4 overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="text-xs md:text-sm">Module</TableHead>
+                        <TableHead className="text-xs md:text-sm text-right">Avg. Score</TableHead>
+                        <TableHead className="text-xs md:text-sm text-right">Avg. Attempts</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {moduleAnalytics.map((module) => (
+                        <TableRow key={module.id}>
+                          <TableCell className="font-medium text-xs md:text-sm">{module.title.split(' ')[0]}</TableCell>
+                          <TableCell className="text-right text-xs md:text-sm">{module.averageScore}%</TableCell>
+                          <TableCell className="text-right text-xs md:text-sm">{module.averageAttempts}</TableCell>
                         </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {moduleAnalytics.map((module) => (
-                          <TableRow key={module.id}>
-                            <TableCell className="font-medium">{module.title.split(' ')[0]}</TableCell>
-                            <TableCell className="text-right">{module.averageScore}%</TableCell>
-                            <TableCell className="text-right">{module.averageAttempts}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </CardContent>
-                </Card>
-              </div>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
           
           <TabsContent value="employees">
             <Card>
-              <CardHeader>
-                <CardTitle>Employee Progress</CardTitle>
+              <CardHeader className="px-4 py-4">
+                <CardTitle className="text-base md:text-lg">Employee Progress</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="px-2 md:px-4">
                 <div className="mb-6">
                   <EmployeeProgressTable />
                 </div>

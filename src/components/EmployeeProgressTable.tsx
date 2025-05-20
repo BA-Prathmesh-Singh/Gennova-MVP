@@ -11,6 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { trainingModules } from '@/data/modules';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 // Sample employee progress data for demonstration
 const employeesData = [
@@ -90,6 +91,7 @@ const employeesData = [
 
 export function EmployeeProgressTable() {
   const [searchTerm, setSearchTerm] = useState('');
+  const isMobile = useIsMobile();
   const totalModules = trainingModules.length;
   
   // Filter employees based on search term
@@ -112,53 +114,90 @@ export function EmployeeProgressTable() {
     }
   };
   
+  // Mobile optimized employee card
+  const EmployeeCard = ({ employee }: { employee: typeof employeesData[0] }) => {
+    return (
+      <div className="border rounded-md p-3 mb-2">
+        <div className="flex justify-between items-start mb-2">
+          <div>
+            <h3 className="font-medium text-sm">{employee.name}</h3>
+            <p className="text-xs text-gray-500">{employee.department}</p>
+          </div>
+          <Badge className={`${getBadgeVariant(employee.status)} text-xs`}>
+            {employee.status === 'completed' && 'Complete'}
+            {employee.status === 'in-progress' && 'In Progress'}
+            {employee.status === 'not-started' && 'Not Started'}
+          </Badge>
+        </div>
+        
+        <div className="flex items-center gap-2 mb-2">
+          <div className="w-full bg-gray-100 rounded-full h-2">
+            <div 
+              className="bg-blue-600 h-2 rounded-full" 
+              style={{ width: `${employee.progress}%` }}
+            ></div>
+          </div>
+          <span className="text-xs">{employee.progress}%</span>
+        </div>
+        
+        <div className="grid grid-cols-2 gap-2 text-xs">
+          <div className="text-gray-500">Modules:</div>
+          <div>{employee.modulesCompleted}/{totalModules}</div>
+          <div className="text-gray-500">Last Active:</div>
+          <div>{employee.lastActive !== 'N/A' ? new Date(employee.lastActive).toLocaleDateString() : 'Not started'}</div>
+        </div>
+      </div>
+    );
+  };
+  
   return (
     <div>
       <div className="mb-4">
         <Input
-          placeholder="Search employees by name or department..."
+          placeholder={isMobile ? "Search..." : "Search employees by name or department..."}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="max-w-sm"
         />
       </div>
       
-      <div className="rounded-md border overflow-hidden">
+      {/* Desktop Table View */}
+      <div className="hidden sm:block rounded-md border overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Employee</TableHead>
-              <TableHead>Department</TableHead>
-              <TableHead>Progress</TableHead>
-              <TableHead>Modules Completed</TableHead>
-              <TableHead>Last Active</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead className="text-xs md:text-sm">Employee</TableHead>
+              <TableHead className="text-xs md:text-sm">Department</TableHead>
+              <TableHead className="text-xs md:text-sm">Progress</TableHead>
+              <TableHead className="text-xs md:text-sm">Modules</TableHead>
+              <TableHead className="text-xs md:text-sm">Last Active</TableHead>
+              <TableHead className="text-xs md:text-sm">Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredEmployees.map((employee) => (
               <TableRow key={employee.id}>
-                <TableCell className="font-medium">{employee.name}</TableCell>
-                <TableCell>{employee.department}</TableCell>
+                <TableCell className="font-medium text-xs md:text-sm">{employee.name}</TableCell>
+                <TableCell className="text-xs md:text-sm">{employee.department}</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
-                    <div className="w-full max-w-[100px] bg-gray-100 rounded-full h-2.5">
+                    <div className="w-full max-w-[100px] bg-gray-100 rounded-full h-2">
                       <div 
-                        className="bg-blue-600 h-2.5 rounded-full" 
+                        className="bg-blue-600 h-2 rounded-full" 
                         style={{ width: `${employee.progress}%` }}
                       ></div>
                     </div>
-                    <span className="text-sm">{employee.progress}%</span>
+                    <span className="text-xs md:text-sm">{employee.progress}%</span>
                   </div>
                 </TableCell>
-                <TableCell>{employee.modulesCompleted}/{totalModules}</TableCell>
-                <TableCell>
+                <TableCell className="text-xs md:text-sm">{employee.modulesCompleted}/{totalModules}</TableCell>
+                <TableCell className="text-xs md:text-sm">
                   {employee.lastActive !== 'N/A' 
                     ? new Date(employee.lastActive).toLocaleDateString() 
                     : 'Not started'}
                 </TableCell>
                 <TableCell>
-                  <Badge className={`${getBadgeVariant(employee.status)}`}>
+                  <Badge className={`${getBadgeVariant(employee.status)} text-xs`}>
                     {employee.status === 'completed' && 'Complete'}
                     {employee.status === 'in-progress' && 'In Progress'}
                     {employee.status === 'not-started' && 'Not Started'}
@@ -169,7 +208,7 @@ export function EmployeeProgressTable() {
             
             {filteredEmployees.length === 0 && (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-6">
+                <TableCell colSpan={6} className="text-center py-6 text-sm">
                   No employees found matching your search.
                 </TableCell>
               </TableRow>
@@ -178,7 +217,20 @@ export function EmployeeProgressTable() {
         </Table>
       </div>
       
-      <div className="text-sm text-muted-foreground mt-4">
+      {/* Mobile Card View */}
+      <div className="sm:hidden">
+        {filteredEmployees.map(employee => (
+          <EmployeeCard key={employee.id} employee={employee} />
+        ))}
+        
+        {filteredEmployees.length === 0 && (
+          <div className="text-center py-4 text-sm">
+            No employees found matching your search.
+          </div>
+        )}
+      </div>
+      
+      <div className="text-xs md:text-sm text-muted-foreground mt-4">
         Showing {filteredEmployees.length} of {employeesData.length} employees
       </div>
     </div>
