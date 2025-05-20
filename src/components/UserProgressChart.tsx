@@ -20,7 +20,7 @@ export function UserProgressChart({ data }: UserProgressChartProps) {
   // Format data for chart
   const chartData = data.map(item => ({
     name: item.name,
-    displayName: item.name.split(' ')[0],
+    displayName: isMobile ? item.name.split(' ')[0] : item.name.length > 8 ? item.name.substring(0, 8) + '...' : item.name,
     points: item.points,
     date: format(item.date, 'MMM d')
   }));
@@ -45,18 +45,20 @@ export function UserProgressChart({ data }: UserProgressChartProps) {
         data={chartData}
         margin={{
           top: 20,
-          right: isMobile ? 10 : 30,
-          left: isMobile ? 10 : 20,
-          bottom: isMobile ? 80 : 60,
+          right: isMobile ? 5 : 30,
+          left: isMobile ? 5 : 20,
+          bottom: isMobile ? 60 : 40,
         }}
+        barSize={isMobile ? 15 : 30}
       >
         <CartesianGrid strokeDasharray="3 3" vertical={false} />
         <XAxis 
           dataKey="displayName" 
           tickLine={false}
-          angle={isMobile ? -65 : -45}
+          angle={isMobile ? -45 : -30}
           textAnchor="end"
-          height={isMobile ? 80 : 60}
+          height={isMobile ? 70 : 60}
+          interval={0}
           tick={{ fontSize: isMobile ? 10 : 12 }}
         />
         <YAxis 
@@ -67,16 +69,17 @@ export function UserProgressChart({ data }: UserProgressChartProps) {
             angle: -90, 
             position: 'insideLeft',
             style: { textAnchor: 'middle' },
-            fontSize: isMobile ? 10 : 12
+            fontSize: isMobile ? 10 : 12,
+            offset: isMobile ? -10 : 0
           }}
           tick={{ fontSize: isMobile ? 10 : 12 }}
+          width={isMobile ? 30 : 40}
         />
         <Tooltip content={<CustomTooltip />} />
         <Bar 
           dataKey="points" 
           fill="#8884d8" 
           radius={[4, 4, 0, 0]}
-          barSize={isMobile ? 20 : 30}
         />
       </BarChart>
     </ResponsiveContainer>

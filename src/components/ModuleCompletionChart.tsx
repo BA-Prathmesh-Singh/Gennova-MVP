@@ -31,7 +31,7 @@ export function ModuleCompletionChart({ data }: ModuleCompletionChartProps) {
   // Format data for chart display
   const chartData = data.map(module => ({
     name: module.title,
-    displayName: module.title.split(' ')[0],
+    displayName: isMobile ? module.title.split(' ')[0] : module.title.length > 12 ? module.title.substring(0, 12) + '...' : module.title,
     completionRate: module.completionRate,
     averageScore: module.averageScore,
   }));
@@ -39,7 +39,7 @@ export function ModuleCompletionChart({ data }: ModuleCompletionChartProps) {
   // Custom tooltip
   const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
     if (active && payload && payload.length) {
-      const moduleData = data.find(m => m.title.split(' ')[0] === label);
+      const moduleData = data.find(m => m.title.split(' ')[0] === label || m.title.startsWith(label));
       
       return (
         <div className="bg-white p-3 border border-gray-200 rounded-md shadow-md">
@@ -60,9 +60,9 @@ export function ModuleCompletionChart({ data }: ModuleCompletionChartProps) {
         data={chartData}
         margin={{
           top: 20,
-          right: isMobile ? 10 : 30,
+          right: isMobile ? 5 : 30,
           left: isMobile ? 0 : 20,
-          bottom: isMobile ? 5 : 5,
+          bottom: isMobile ? 60 : 5,
         }}
         barGap={isMobile ? 2 : 4}
         barCategoryGap={isMobile ? 4 : 10}
@@ -75,6 +75,7 @@ export function ModuleCompletionChart({ data }: ModuleCompletionChartProps) {
           angle={isMobile ? -45 : 0}
           textAnchor={isMobile ? "end" : "middle"}
           height={isMobile ? 60 : 30}
+          interval={0}
         />
         <YAxis 
           tickLine={false}
@@ -90,7 +91,11 @@ export function ModuleCompletionChart({ data }: ModuleCompletionChartProps) {
           }} 
         />
         <Tooltip content={<CustomTooltip />} />
-        <Legend wrapperStyle={{ fontSize: isMobile ? 10 : 12 }} />
+        <Legend 
+          wrapperStyle={{ fontSize: isMobile ? 10 : 12 }} 
+          verticalAlign={isMobile ? "bottom" : "bottom"}
+          height={isMobile ? 36 : 20}
+        />
         <Bar 
           dataKey="completionRate" 
           name="Completion Rate" 
