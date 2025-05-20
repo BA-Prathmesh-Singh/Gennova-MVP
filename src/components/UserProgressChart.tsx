@@ -2,6 +2,7 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, TooltipProps } from 'recharts';
 import { format } from 'date-fns';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ProgressDataPoint {
   name: string;
@@ -14,6 +15,8 @@ interface UserProgressChartProps {
 }
 
 export function UserProgressChart({ data }: UserProgressChartProps) {
+  const isMobile = useIsMobile();
+  
   // Format data for chart
   const chartData = data.map(item => ({
     name: item.name,
@@ -42,18 +45,19 @@ export function UserProgressChart({ data }: UserProgressChartProps) {
         data={chartData}
         margin={{
           top: 20,
-          right: 30,
-          left: 20,
-          bottom: 60,
+          right: isMobile ? 10 : 30,
+          left: isMobile ? 10 : 20,
+          bottom: isMobile ? 80 : 60,
         }}
       >
         <CartesianGrid strokeDasharray="3 3" vertical={false} />
         <XAxis 
           dataKey="displayName" 
           tickLine={false}
-          angle={-45}
+          angle={isMobile ? -65 : -45}
           textAnchor="end"
-          height={60}
+          height={isMobile ? 80 : 60}
+          tick={{ fontSize: isMobile ? 10 : 12 }}
         />
         <YAxis 
           tickLine={false}
@@ -62,15 +66,17 @@ export function UserProgressChart({ data }: UserProgressChartProps) {
             value: 'Points', 
             angle: -90, 
             position: 'insideLeft',
-            style: { textAnchor: 'middle' }
-          }} 
+            style: { textAnchor: 'middle' },
+            fontSize: isMobile ? 10 : 12
+          }}
+          tick={{ fontSize: isMobile ? 10 : 12 }}
         />
         <Tooltip content={<CustomTooltip />} />
         <Bar 
           dataKey="points" 
           fill="#8884d8" 
           radius={[4, 4, 0, 0]}
-          barSize={30}
+          barSize={isMobile ? 20 : 30}
         />
       </BarChart>
     </ResponsiveContainer>
